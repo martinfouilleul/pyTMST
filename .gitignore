@@ -1,0 +1,5 @@
+venv
+build
+pyTMST.egg-info
+matlab_toolboxes/*
+.gitignore

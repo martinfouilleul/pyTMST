@@ -1,0 +1,6 @@
+numpy
+scipy
+soundfile
+
+git+https://github.com/detly/gammatone.git
+git+https://github.com/anzic0/Yin.git
