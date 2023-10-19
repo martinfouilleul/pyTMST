@@ -7,6 +7,7 @@ import gammatone.filters
 
 
 AMa_spec_params = namedtuple('AMa_spec_params', ['t', 'f_bw', 'gamma_responses', 'E', 'mf', 'mfb'])
+AMi_spec_params = namedtuple('AMi_spec_params', ['t', 'f_bw', 'gamma_responses', 'E', 'mf', 'AMrms', 'DC'])
 
 
 def freq_to_erb(freq):
@@ -90,3 +91,45 @@ def AMa_spectrum(sig, fs, mfmin=0.5, mfmax=200, modbank_Nmod=200, fmin=70, fmax=
     step = AMa_spec_params(t, erb_filt_bw(fc), gamma_responses, E, f_spectra, f_spectra_intervals)
     return AMspec, fc, f_spectra, step
 
+
+def king2019_modfilterbank_updated(sig, fs, mfmin, mfmax, modbank_Nmod, modbank_Qfactor):
+    logfmc = np.linspace(np.log(mfmin), np.log(mfmax), modbank_Nmod)
+    mfc = np.exp(logfmc);
+
+    flim = np.zeros((modbank_Nmod, 2))
+    b = np.zeros((modbank_Nmod, 3))
+    a = np.zeros((modbank_Nmod, 3))
+    outsig = np.zeros((sig.shape[0], sig.shape[1], modbank_Nmod))
+
+    for ichan in range(modbank_Nmod):
+        flim[ichan, :] = mfc[ichan] * np.sqrt(4 + 1 / modbank_Qfactor ** 2) / 2 + np.array([-1, 1]) * mfc[ichan] / modbank_Qfactor / 2
+        b[ichan, :], a[ichan, :] = scipy.signal.butter(1, 2 * flim[ichan, :] / fs, btype='band')
+        outsig[:, :, ichan] = scipy.signal.lfilter(b[ichan, :], a[ichan, :], sig, axis=0)
+
+    step = {
+        'b': b,
+        'a': a,
+    }
+
+    return outsig.T, mfc, step
+
+
+def AMi_spectrum(sig, fs, mfmin=0.5, mfmax=200., modbank_Nmod=200, modbank_Qfactor=1, fmin=70, fmax=6700):
+    if not isinstance(sig, np.ndarray) or not isinstance(fs, (int, float)):
+        raise ValueError("Invalid input types.")
+    if fs <= 0:
+        raise ValueError("fs must be a positive scalar.")
+    
+    t = np.arange(1,len(sig)+1) / fs
+    gamma_responses, fc = apply_gammatone_filterbank(sig, fs, fmin, fmax)
+    E = np.abs(scipy.signal.hilbert(gamma_responses, axis=1))
+
+    Nchan = fc.shape[0]
+    AMfilt, mf, _ = king2019_modfilterbank_updated(E.T, fs, mfmin, mfmax, modbank_Nmod, modbank_Qfactor)
+
+    AMrms = np.sqrt(np.mean(AMfilt ** 2, axis=2)) * np.sqrt(2)
+    DC = np.mean(E.T, axis=0)
+    AMIspec = AMrms.T / (DC[:, np.newaxis] * np.ones(mf.shape[0]))
+
+    step = AMi_spec_params(t, erb_filt_bw(fc), gamma_responses, E, mf, AMrms, DC)
+    return AMIspec, fc, mf, step

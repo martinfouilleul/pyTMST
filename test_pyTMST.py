@@ -148,6 +148,86 @@ class TestTMST(unittest.TestCase):
         np.testing.assert_allclose(mat_AMa_spec, py_AMa_spec,
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 
+    def test_lp_butter_filter(self):
+        audio_path = './LaVoixHumaine_6s.wav'
+        order = 1
+        cutoff = 150
+
+        sig, fs = sf.read(audio_path)
+        sig = sig[:,0]
+        py_b, py_a = scipy.signal.butter(order, cutoff, fs=fs)
+        py_outsig = scipy.signal.lfilter(py_b, py_a, sig)
+        
+        self.eng.eval(f"[sig, fs] = audioread('{audio_path}');", nargout=0)
+        self.eng.eval(f"[b, a] = butter({order}, {cutoff}/(fs/2));", nargout=0)
+        self.eng.eval("outsig = filter(b, a, sig(:,1));", nargout=0)
+        mat_b = np.squeeze(self.eng.workspace['b'])
+        mat_a = np.squeeze(self.eng.workspace['a'])
+        mat_outsig = np.squeeze(self.eng.workspace['outsig'])
+
+        np.testing.assert_allclose(mat_b, py_b,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+        np.testing.assert_allclose(mat_a, py_a,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+        np.testing.assert_allclose(mat_outsig, py_outsig,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+
+    def test_king2019_modfilterbank_updated_mono(self):
+        sig = np.random.rand(30, 10000)
+        fs = 2500.
+        mfmin, mfmax = 0.5, 200.
+        modbank_Nmod = 200
+        modbank_Qfactor = 1.
+
+        py_outsig, py_mfc, py_step = pyTMST.king2019_modfilterbank_updated(sig, fs, mfmin, mfmax, modbank_Nmod, modbank_Qfactor)
+
+        self.eng.workspace['sig'] = matlab.double(sig.tolist())
+        self.eng.workspace['fs'] = fs
+        matlab_code = f"""
+            flags = struct('do_LP_150_Hz', 0, 'do_phase_insens_hilbert', 0);
+            kv = struct('mflow', {mfmin}, 'mfhigh', {mfmax}, 'modbank_Nmod', {modbank_Nmod}, 'modbank_Qfactor', {modbank_Qfactor});
+            [outsig, mfc, step] = king2019_modfilterbank_updated(sig, fs, 'argimport', flags, kv);
+        """
+        self.eng.eval(matlab_code, nargout=0)
+        mat_outsig = np.transpose(self.eng.workspace['outsig'])
+        mat_mfc = np.squeeze(self.eng.workspace['mfc'])
+        mat_step = self.eng.workspace['step']
+
+        np.testing.assert_allclose(mat_outsig, py_outsig,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+        np.testing.assert_allclose(mat_mfc, py_mfc,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+        np.testing.assert_allclose(np.squeeze(mat_step['a']), py_step['a'],
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+        np.testing.assert_allclose(np.squeeze(mat_step['b']), py_step['b'],
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+
+    def test_AMi_spectrum_mono(self):
+        audio_path = './LaVoixHumaine_6s.wav'
+        mfmin, mfmax = 0.5, 200.
+        modbank_Nmod = 200
+        modbank_Qfactor = 1
+        fmin, fmax = 70., 6700.
+
+        sig, fs = sf.read(audio_path)
+        sig = sig[:,0]
+        py_AMi_spec, py_fc, py_mf, py_step = pyTMST.AMi_spectrum(sig, fs, mfmin, mfmax, modbank_Nmod, modbank_Qfactor, fmin, fmax)
+        
+        
+        self.eng.eval(f"[sig, fs] = audioread('{audio_path}');", nargout=0)
+        self.eng.eval(f"[AMIspec, fc, mf, step] = AMIspectrum(sig(:,1), fs);", nargout=0)
+        mat_AMi_spec = np.squeeze(self.eng.workspace['AMIspec'])
+        mat_fc = np.squeeze(self.eng.workspace['fc'])
+        mat_mf = np.squeeze(self.eng.workspace['mf'])
+        mat_step = pyTMST.AMi_spec_params(**self.eng.workspace['step'])
+
+        np.testing.assert_allclose(mat_fc, py_fc,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+        np.testing.assert_allclose(mat_mf, py_mf,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+        np.testing.assert_allclose(np.transpose(mat_AMi_spec), py_AMi_spec,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+
 
 
 if __name__ == '__main__':
