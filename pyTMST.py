@@ -78,13 +78,13 @@ def AMa_spectrum(sig, fs, mfmin=0.5, mfmax=200, modbank_Nmod=200, fmin=70, fmax=
     
     t = np.arange(1,len(sig)+1) / fs
     gamma_responses, fc = apply_gammatone_filterbank(sig, fs, fmin, fmax)
-    E = np.abs(scipy.signal.hilbert(gamma_responses, axis=0))
+    E = np.abs(scipy.signal.hilbert(gamma_responses, axis=1))
     
     f_spectra, f_spectra_intervals = define_modulation_axis(mfmin, mfmax, modbank_Nmod)
     Nchan = fc.shape[0]
     AMspec = np.zeros((f_spectra.shape[0], Nchan))
     for ichan in range(Nchan):
-        Pxx = periodogram(E[:, ichan], fs, f_spectra)
+        Pxx = periodogram(E[ichan, :], fs, f_spectra)
         AMspec[:, ichan] = 2 * Pxx
    
     step = AMa_spec_params(t, erb_filt_bw(fc), gamma_responses, E, f_spectra, f_spectra_intervals)
