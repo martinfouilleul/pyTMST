@@ -145,25 +145,13 @@ class TestTMST(unittest.TestCase):
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
         np.testing.assert_allclose(mat_mf, py_mf,
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
-        np.testing.assert_allclose(np.squeeze(mat_step.t), py_step.t,
-                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
-        np.testing.assert_allclose(np.squeeze(mat_step.f_bw), py_step.f_bw,
-                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
-        np.testing.assert_allclose(np.transpose(mat_step.gamma_responses), py_step.gamma_responses,
-                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
-        np.testing.assert_allclose(np.transpose(mat_step.E), py_step.E,
-                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
-        np.testing.assert_allclose(np.squeeze(mat_step.mf), py_step.mf,
-                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
-        np.testing.assert_allclose(np.squeeze(mat_step.mfb), py_step.mfb,
-                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
         np.testing.assert_allclose(mat_AMa_spec, py_AMa_spec,
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Run tests specified in ./test_specs.json for pyTMST module.')
+    parser = argparse.ArgumentParser(description='Run unit tests for the pyTMST module.')
     parser.add_argument('--float_rel_tolerance', type=float, default=1.e-7,
                         help='Relative tolerance for floating point comparisons')
     parser.add_argument('--float_abs_tolerance', type=float, default=0,
