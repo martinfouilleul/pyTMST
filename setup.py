@@ -14,5 +14,9 @@ setup(
         ],
     author='Anton Zickler',
     author_email='anton.zickler@proton.me',
+    package_data={
+        'pyTMST': ['LICENSE.md'],
+        'pyTMST': ['LICENSES/*'],
+        },
 )
 

@@ -1,3 +1,19 @@
+"""
+Author: Anton Zickler
+Copyright (c) 2023 A. Zickler, M. Ernst, L. Varnet, A. Tavano
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+
 import unittest
 import os
 import argparse
@@ -27,32 +43,32 @@ class TestPyLTFAT(unittest.TestCase):
         cls.eng.quit()
 
 
-    def test_freq_to_erb(self):
+    def test_freq_to_aud(self):
         freq = 70.;
         matlab_result = self.eng.freqtoaud(freq)
-        python_result = pyLTFAT.freq_to_erb(freq)
+        python_result = pyLTFAT.freq_to_aud(freq)
         np.testing.assert_allclose(matlab_result, python_result,
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 
 
-    def test_erb_to_freq(self):
+    def test_aud_to_freq(self):
         erb = 31.6
         matlab_result = self.eng.audtofreq(erb)
-        python_result = pyLTFAT.erb_to_freq(erb)
+        python_result = pyLTFAT.aud_to_freq(erb)
         np.testing.assert_allclose(matlab_result, python_result,
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 
-    def test_erb_filt_bw(self):
+    def test_aud_filt_bw(self):
         fc = 70.
         mat_bw = self.eng.audfiltbw(fc)
-        py_bw = pyLTFAT.erb_filt_bw(fc)
+        py_bw = pyLTFAT.aud_filt_bw(fc)
         np.testing.assert_allclose(mat_bw, py_bw,
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 
-    def test_erbspace_bw(self):
+    def test_aud_space_bw(self):
         fmin, fmax = 70., 6700.
-        matlab_result = np.array(self.eng.erbspacebw(fmin, fmax)).squeeze()
-        python_result = pyLTFAT.erbspace_bw(fmin, fmax, bw=1)
+        matlab_result = np.array(self.eng.audspacebw(fmin, fmax)).squeeze()
+        python_result = pyLTFAT.aud_space_bw(fmin, fmax, bw=1)
         np.testing.assert_allclose(matlab_result, python_result,
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 

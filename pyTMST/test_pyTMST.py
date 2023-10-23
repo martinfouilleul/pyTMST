@@ -1,3 +1,14 @@
+"""
+Author: Anton Zickler
+Copyright (c) 2023 A. Zickler, M. Ernst, L. Varnet, A. Tavano
+
+This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 
+International License (CC BY-NC 4.0).
+You should have received a copy of the license along with this
+work. If not, see <https://creativecommons.org/licenses/by-nc/4.0/>.
+"""
+
+
 import unittest
 import os
 import argparse

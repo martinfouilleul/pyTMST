@@ -1,11 +1,28 @@
+"""
+Author: Anton Zickler
+Copyright (c) 2023 A. Zickler, M. Ernst, L. Varnet, A. Tavano
+
+Python port of the [Temporal Modulation Spectrum Toolbox
+(TMST)](https://github.com/LeoVarnet/TMST) for MATLAB:
+> L. Varnet (2023). "Temporal Modulation Spectrum Toolbox: A Matlab toolbox
+> for the computation of amplitude- and f0- modulation spectra and
+> spectrograms."
+
+This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 
+International License (CC BY-NC 4.0).
+You should have received a copy of the license along with this
+work. If not, see <https://creativecommons.org/licenses/by-nc/4.0/>.
+"""
+
+
 from collections import namedtuple
 
 import numpy as np
 from scipy.signal import hilbert
 
 from .utils import define_modulation_axis, periodogram
-from .pyLTFAT import erb_filt_bw
-from .pyAMT import apply_gammatone_filterbank, king2019_modfilterbank_updated
+from .pyLTFAT import aud_filt_bw
+from .pyAMT import auditory_filterbank, king2019_modfilterbank_updated
 
 
 AMa_spec_params = namedtuple('AMa_spec_params', ['t', 'f_bw', 'gamma_responses', 'E', 'mf', 'mfb'])
@@ -19,7 +36,7 @@ def AMa_spectrum(sig, fs, mfmin=0.5, mfmax=200, modbank_Nmod=200, fmin=70, fmax=
         raise ValueError("fs must be a positive scalar.")
     
     t = np.arange(1,len(sig)+1) / fs
-    gamma_responses, fc = apply_gammatone_filterbank(sig, fs, fmin, fmax)
+    gamma_responses, fc = auditory_filterbank(sig, fs, fmin, fmax)
     E = np.abs(hilbert(gamma_responses, axis=1))
     
     f_spectra, f_spectra_intervals = define_modulation_axis(mfmin, mfmax, modbank_Nmod)
@@ -29,7 +46,7 @@ def AMa_spectrum(sig, fs, mfmin=0.5, mfmax=200, modbank_Nmod=200, fmin=70, fmax=
         Pxx = periodogram(E[ichan, :], fs, f_spectra)
         AMspec[:, ichan] = 2 * Pxx
    
-    step = AMa_spec_params(t, erb_filt_bw(fc), gamma_responses, E, f_spectra, f_spectra_intervals)
+    step = AMa_spec_params(t, aud_filt_bw(fc), gamma_responses, E, f_spectra, f_spectra_intervals)
     return AMspec, fc, f_spectra, step
 
 
@@ -40,7 +57,7 @@ def AMi_spectrum(sig, fs, mfmin=0.5, mfmax=200., modbank_Nmod=200, modbank_Qfact
         raise ValueError("fs must be a positive scalar.")
     
     t = np.arange(1,len(sig)+1) / fs
-    gamma_responses, fc = apply_gammatone_filterbank(sig, fs, fmin, fmax)
+    gamma_responses, fc = auditory_filterbank(sig, fs, fmin, fmax)
     E = np.abs(hilbert(gamma_responses, axis=1))
 
     Nchan = fc.shape[0]
@@ -50,6 +67,6 @@ def AMi_spectrum(sig, fs, mfmin=0.5, mfmax=200., modbank_Nmod=200, modbank_Qfact
     DC = np.mean(E.T, axis=0)
     AMIspec = AMrms.T / (DC[:, np.newaxis] * np.ones(mf.shape[0]))
 
-    step = AMi_spec_params(t, erb_filt_bw(fc), gamma_responses, E, mf, AMrms, DC)
+    step = AMi_spec_params(t, aud_filt_bw(fc), gamma_responses, E, mf, AMrms, DC)
     return AMIspec, fc, mf, step
 

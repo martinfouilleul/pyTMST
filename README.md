@@ -1,7 +1,12 @@
 # pyTMST
 
-Python port of the [MATLAB TMST toolbox](https://github.com/LeoVarnet/TMST) by
-Léo Varnet. Currently a work in progress.
+Python port of the [Temporal Modulation Spectrum Toolbox
+(TMST)](https://github.com/LeoVarnet/TMST) for MATLAB:
+> L. Varnet (2023). "Temporal Modulation Spectrum Toolbox: A Matlab toolbox
+> for the computation of amplitude- and f0- modulation spectra and
+> spectrograms."
+
+Currently a work in progress.
 
 ## Progress
 
@@ -70,3 +75,11 @@ following steps may be followed:
    ```
    python -m pip install .
    ```
+
+## Citation
+
+This repository may be cited as follows
+> A. Zickler, M. Ernst, L. Varnet, A. Tavano (2023). Temporal Modulation
+> Spectrum Toolbox for Python (pyTMST): A Python toolbox for the computation of
+> amplitude- and f0- modulation spectra and spectrograms.
+

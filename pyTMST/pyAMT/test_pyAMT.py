@@ -1,3 +1,19 @@
+"""
+Author: Anton Zickler
+Copyright (c) 2023 A. Zickler, M. Ernst, L. Varnet, A. Tavano
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+
 import unittest
 import os
 import argparse
@@ -30,13 +46,13 @@ class TestPyAMT(unittest.TestCase):
         cls.eng.quit()
 
 
-    def test_apply_gammatone_filterbank(self):
+    def test_auditory_filterbank(self):
         audio_path = './LaVoixHumaine_6s.wav'
         fmin, fmax = 70., 6700.
 
         sig, fs = sf.read(audio_path)
         sig = sig[:,0]
-        py_gamma_responses, py_fc = pyAMT.apply_gammatone_filterbank(sig, fs, fmin, fmax)
+        py_gamma_responses, py_fc = pyAMT.auditory_filterbank(sig, fs, fmin, fmax)
 
         self.eng.eval(f"[sig, fs] = audioread('{audio_path}');", nargout=0)
         self.eng.eval(f"[response, fc] = auditoryfilterbank(sig(:,1), fs, {fmin}, {fmax});", nargout=0)
