@@ -19,8 +19,13 @@ import soundfile as sf
 
 import pyTMST
 
+from .utils import define_modulation_axis, periodogram, lombscargle, remove_artifacts, interpmean
 
-MATLAB_TOOLBOX_PATHS = ["./matlab_toolboxes/TMST/", "./matlab_toolboxes/amtoolbox"]
+MATLAB_TOOLBOX_PATHS = [
+    "./matlab_toolboxes/TMST/",
+    "./matlab_toolboxes/amtoolbox",
+    "./matlab_toolboxes/yin"
+    ]
 
 
 class TestPyTMST(unittest.TestCase):
@@ -90,6 +95,36 @@ class TestPyTMST(unittest.TestCase):
         np.testing.assert_allclose(mat_mf, py_mf,
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
         np.testing.assert_allclose(np.transpose(mat_AMi_spec), py_AMi_spec,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+
+
+    def test_f0M_spectrum(self):
+        audio_path = './LaVoixHumaine_6s.wav'
+        mfmin, mfmax = .5, 200.
+        modbank_Nmod = 200
+        undersample = 20
+        fmin, fmax = 60, 550
+        yin_thresh = .2
+        ap0_thresh = .8
+        max_jump = 10
+        min_duration = .08
+
+        sig, fs = sf.read(audio_path)
+        sig = sig[:,0]
+        py_f0M_spec, py_mf, py_step = pyTMST.f0M_spectrum(sig, fs, mfmin, mfmax, modbank_Nmod, undersample, fmin, fmax, yin_thresh, ap0_thresh, max_jump, min_duration)
+
+        self.eng.eval(f"[sig, fs] = audioread('{audio_path}');", nargout=0)
+        self.eng.eval("[f0M_spec, mf, step] = f0Mspectrum(sig(:,1), fs);", nargout=0)
+        mat_f0M_spec = np.squeeze(self.eng.workspace['f0M_spec'])
+        mat_mf = np.squeeze(self.eng.workspace['mf'])
+        mat_step = self.eng.workspace['step']
+        mat_step.pop('kv')
+        mat_step.pop('flags')
+        mat_step = pyTMST.f0M_spec_params(**mat_step)
+
+        np.testing.assert_allclose(mat_f0M_spec, py_f0M_spec,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+        np.testing.assert_allclose(mat_mf, py_mf,
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 
 
