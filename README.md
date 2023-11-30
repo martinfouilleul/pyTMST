@@ -16,9 +16,13 @@ the first channel of the file `LaVoixHumaine_6s.wav` as a test signal. Note
 that this does not mean that the results of the intermediate functions or
 different test signals will give the same tolerance.
 
-The f0 spectrum calculation is currently being worked on.
-
-Compatibility with stereo signals will probably be implemented in the future.
+The f0 modulation spectrum calculation is implemented on the `f0M_spectrum`
+branch. It currently uses the MATLAB Python engine to make use of the YIN
+algorithm implemented in MATLAB. Once a suitable Python implementation of the
+YIN algorithm has been found, it will be incorporated and merged into the main
+branch. To use the current implementation on the `f0M_spectrum` branch, one
+must install the MATLAB Python engine and download the MATLAB YIN library (see
+section [Testing](#Testing)).
 
 ## Installation
 
@@ -26,7 +30,7 @@ Compatibility with stereo signals will probably be implemented in the future.
    environment dedicated to your project.
    1. Create a virtual environment
       ```
-      python3 -m venv <env-name>
+      python -m venv <env-name>
       ```
    2. Activate the virtual environment
       ```
@@ -73,8 +77,18 @@ following steps may be followed:
    ```
 3. Install via pip
    ```
-   python -m pip install .
+   pip install .
    ```
+
+To run tests for the main functions, use
+```
+python -m pyTMST.test_pyTMST
+```
+
+To run tests for any of the submodules, use
+```
+python -m pyTMST.<submodule>.test_<submodule>
+```
 
 ## Citation
 
