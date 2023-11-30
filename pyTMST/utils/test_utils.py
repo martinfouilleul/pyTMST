@@ -21,11 +21,20 @@ from scipy.signal import hilbert, butter, lfilter
 from . import utils
 
 
+MATLAB_TOOLBOX_PATHS = ["./matlab_toolboxes/TMST/", "./matlab_toolboxes/amtoolbox"]
+
+
 class TestUtils(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         cls.eng = matlab.engine.start_matlab()
+
+        for path in MATLAB_TOOLBOX_PATHS:
+            if os.path.exists(path):
+                cls.eng.eval(f"addpath(genpath('{path}'))", nargout=0)
+            else:
+                print(f"The path {path} does not exist.")
 
     @classmethod
     def tearDownClass(cls):
@@ -46,6 +55,38 @@ class TestUtils(unittest.TestCase):
         np.testing.assert_allclose(mat_f_spectra, py_f_spectra,
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
         np.testing.assert_allclose(mat_f_spectra_intervals, py_f_spectra_intervals,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+
+
+    def test_gausswin(self):
+        n = 100
+        alpha = 2.5
+
+        py_gwin = utils.gausswin(n, alpha)
+
+        self.eng.eval(f"gwin = gausswin({n}, {alpha});", nargout=0)
+        mat_gwin = np.squeeze(self.eng.workspace['gwin'])
+
+        np.testing.assert_allclose(mat_gwin, py_gwin,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+
+
+    def test_segment_into_windows(self):
+        audio_path = './LaVoixHumaine_6s.wav'
+        sig, fs = sf.read(audio_path)
+        sig = sig[:,0]
+
+        width = 4 * (1/fs)
+        shift = 0.1
+        gwin = True
+
+        py_windows = utils.segment_into_windows(sig, fs, width, shift, gwin)
+
+        self.eng.eval(f"[sig, fs] = audioread('{audio_path}');", nargout=0)
+        self.eng.eval(f"windows = windowing(sig(:,1), fs, {width}, {shift}, {int(gwin)});", nargout=0)
+        mat_windows = np.squeeze(self.eng.workspace['windows']).T
+
+        np.testing.assert_allclose(mat_windows, py_windows,
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 
 

@@ -67,6 +67,32 @@ class TestPyTMST(unittest.TestCase):
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 
 
+    def test_AMa_scalogram(self):
+        audio_path = './LaVoixHumaine_6s.wav'
+        window_NT = 3
+        mfmin, mfmax = 0.5, 200.
+        modbank_Nmod = 200
+        fmin, fmax = 70., 6700.
+
+        sig, fs = sf.read(audio_path)
+        sig = sig[:,0]
+        py_AMa_scalo, py_fc, py_scale, py_step = pyTMST.AMa_scalogram(sig, fs, window_NT, mfmin, mfmax, modbank_Nmod, fmin, fmax)
+
+        self.eng.eval(f"[sig, fs] = audioread('{audio_path}');", nargout=0)
+        self.eng.eval(f"[AMscalo, fc, scale, step] = AMscalogram(sig(:,1), fs, {window_NT});", nargout=0)
+        mat_AMa_scalo = np.squeeze(self.eng.workspace['AMscalo'])
+        mat_fc = np.squeeze(self.eng.workspace['fc'])
+        mat_scale = np.squeeze(self.eng.workspace['scale'])
+        mat_step = pyTMST.AMa_scalogram_params(**self.eng.workspace['step'])
+
+        np.testing.assert_allclose(mat_fc, py_fc,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+        np.testing.assert_allclose(mat_scale, py_scale,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+        np.testing.assert_allclose(mat_AMa_scalo, py_AMa_scalo,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+
+
     def test_AMi_spectrum(self):
         audio_path = './LaVoixHumaine_6s.wav'
         mfmin, mfmax = 0.5, 200.
