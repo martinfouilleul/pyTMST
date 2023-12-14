@@ -154,6 +154,33 @@ class TestPyTMST(unittest.TestCase):
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 
 
+    def test_f0M_scalogram(self):
+        audio_path = './LaVoixHumaine_6s.wav'
+        window_NT = 1024
+        mfmin, mfmax = .5, 200.
+        modbank_Nmod = 200
+        undersample = 20
+        fmin, fmax = 60, 550
+        yin_thresh = .2
+        ap0_thresh = .8
+        max_jump = 10
+        min_duration = .08
+
+        sig, fs = sf.read(audio_path)
+        sig = sig[:,0]
+        py_f0M_scalo, py_scale = pyTMST.f0M_scalogram(sig, fs, window_NT, mfmin, mfmax, modbank_Nmod, undersample, fmin, fmax, yin_thresh, ap0_thresh, max_jump, min_duration)
+
+        self.eng.eval(f"[sig, fs] = audioread('{audio_path}');", nargout=0)
+        self.eng.eval(f"[f0Mscalo, scale, step] = f0Mscalogram(sig(:,1), fs, {window_NT});", nargout=0)
+        mat_f0M_scalo = np.squeeze(self.eng.workspace['f0Mscalo'])
+        mat_scale = np.squeeze(self.eng.workspace['scale'])
+
+        np.testing.assert_allclose(mat_f0M_scalo, py_f0M_scalo,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+        np.testing.assert_allclose(mat_scale, py_scale,
+                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run unit tests for the pyTMST module.')

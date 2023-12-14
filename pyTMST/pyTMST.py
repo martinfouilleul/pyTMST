@@ -148,3 +148,51 @@ def f0M_spectrum(sig, fs, mfmin=.5, mfmax=200., modbank_Nmod=200, undersample=20
 
     return f0M_spectrum, f_spectra, step
 
+
+def f0M_scalogram(sig, fs, window_NT, mfmin=.5, mfmax=200., modbank_Nmod=200, undersample=20, fmin=60, fmax=550, yin_thresh=.2, ap0_thresh=.8, max_jump=10, min_duration=.08):
+    w_len = -(fs // -fmin) # ceiling division
+    f0, ap0 = mock_yin(sig, fs, fmin, fmax, yin_thresh, undersample)
+
+    f0 = 440 * np.power(2, f0)
+    f0[ap0 > ap0_thresh] = np.nan
+    f0 = remove_artifacts(f0, fs/undersample, max_jump, min_duration, (fmin, fmax), (.4, 2.5), 1500)
+
+    f_spectra, f_spectra_intervals = define_modulation_axis(mfmin, mfmax, modbank_Nmod)
+
+    fs_yin = fs / undersample
+    t_yin = np.arange(1, len(f0) + 1) / fs_yin
+
+    # determine first dimension of scalogram (TODO: optimise in future release)
+    dims = []
+    for ifreq in range(modbank_Nmod):
+        window_length = window_NT * (1 / f_spectra[ifreq])
+        shift = 0.1
+        windows = segment_into_windows(f0, fs_yin, window_length, shift, False)
+        n_windows = windows.shape[0]
+        for iwin in range(n_windows):
+            index = iwin + round(window_length / 2 / shift) + 1
+            dims.append(index)
+    dim = np.max(dims)
+
+    f0Msgram = np.zeros((dim, modbank_Nmod))
+    for ifreq in range(modbank_Nmod):
+        window_length = window_NT * (1 / f_spectra[ifreq])
+        shift = 0.1
+        windows = segment_into_windows(f0, fs_yin, window_length, shift, False)
+        t_windows = segment_into_windows(t_yin, fs_yin, window_length, shift, False)
+        n_windows = windows.shape[0]
+
+        for iwin in range(n_windows):
+            f0_temp = windows[iwin]
+            t_temp = t_windows[iwin]
+
+            _, f0Mfft = lombscargle(t_temp, f0_temp, np.array([0.01, f_spectra[ifreq]]))
+            f0Mfft = 2 * f0Mfft[1]
+
+            index = iwin + round(window_length / 2 / shift)
+            f0Msgram[index, ifreq] = f0Mfft
+
+    f0Msgram[f0Msgram == 0] = np.nan
+
+    return f0Msgram, f_spectra
+
