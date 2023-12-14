@@ -64,8 +64,10 @@ def periodogram(sig, fs, freqs):
 
 
 def lombscargle(t, sig, f):
-    avg_fs = np.mean(np.diff(t))**-1
-    pxx = (2 / avg_fs) * scipy.signal.lombscargle(t, sig - np.mean(sig), 2*np.pi*f)
+    fs = t.shape[0] / (t[-1] - t[0])
+    t = t[~np.isnan(sig)]
+    sig = sig[~np.isnan(sig)]
+    pxx = (2 / fs) * scipy.signal.lombscargle(t, sig - np.mean(sig), 2*np.pi*f)
     return f, pxx
 
 

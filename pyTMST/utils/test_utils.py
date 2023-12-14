@@ -82,7 +82,7 @@ class TestUtils(unittest.TestCase):
 
         width = 4 * (1/fs)
         shift = 0.1
-        gwin = True
+        gwin = False
 
         py_windows = utils.segment_into_windows(sig, fs, width, shift, gwin)
 
@@ -121,13 +121,14 @@ class TestUtils(unittest.TestCase):
 
         sig, fs = sf.read(audio_path)
         sig = sig[:,0]
+        sig[::5] = np.nan
         t = random_monotonic_range(0., len(sig) / fs, len(sig))
         py_f, py_pxx = utils.lombscargle(t, sig, freqs)
 
         self.eng.workspace['freqs'] = matlab.double(freqs.tolist())
         self.eng.workspace['t'] = matlab.double(t.tolist())
-        self.eng.eval(f"[sig, fs] = audioread('{audio_path}');", nargout=0)
-        self.eng.eval(f"[pxx, f] = plomb(sig(:,1), t, freqs);", nargout=0)
+        self.eng.workspace['sig'] = matlab.double(sig.tolist())
+        self.eng.eval(f"[pxx, f] = plomb(sig, t, freqs);", nargout=0)
         mat_f = np.squeeze(self.eng.workspace['f'])
         mat_pxx = np.squeeze(self.eng.workspace['pxx'])
 
