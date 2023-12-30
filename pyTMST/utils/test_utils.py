@@ -1,6 +1,5 @@
 """
-Author: Anton Zickler
-Copyright (c) 2023 A. Zickler, M. Ernst, L. Varnet, A. Tavano
+Copyright (c) 2023 A. Zickler, A. Tavano, L. Varnet
 
 This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 
 International License (CC BY-NC 4.0).

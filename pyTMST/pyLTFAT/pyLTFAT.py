@@ -1,6 +1,5 @@
 """
-Author: Anton Zickler
-Copyright (c) 2023 A. Zickler, M. Ernst, L. Varnet, A. Tavano
+Copyright (c) 2023 A. Zickler, A. Tavano, L. Varnet
 
 Based on the [Large Time-Frequency Analysis Toolbox (LTFAT)](https://ltfat.org)
 for MATLAB: 

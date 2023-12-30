@@ -1,6 +1,5 @@
 """
-Author: Anton Zickler
-Copyright (c) 2023 A. Zickler, M. Ernst, L. Varnet, A. Tavano
+Copyright (c) 2023 A. Zickler, A. Tavano, L. Varnet
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software

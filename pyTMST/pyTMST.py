@@ -1,6 +1,5 @@
 """
-Author: Anton Zickler
-Copyright (c) 2023 A. Zickler, M. Ernst, L. Varnet, A. Tavano
+Copyright (c) 2023 A. Zickler, A. Tavano, L. Varnet
 
 Python port of the [Temporal Modulation Spectrum Toolbox
 (TMST)](https://github.com/LeoVarnet/TMST) for MATLAB:

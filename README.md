@@ -6,7 +6,6 @@ Python port of the [Temporal Modulation Spectrum Toolbox
 > for the computation of amplitude- and f0- modulation spectra and
 > spectrograms."
 
-Currently a work in progress.
 
 ## Progress
 
@@ -16,13 +15,6 @@ the first channel of the file `LaVoixHumaine_6s.wav` as a test signal. Note
 that this does not mean that the results of the intermediate functions or
 different test signals will give the same tolerance.
 
-The f0 modulation spectrum calculation is implemented on the `f0M_spectrum`
-branch. It currently uses the MATLAB Python engine to make use of the YIN
-algorithm implemented in MATLAB. Once a suitable Python implementation of the
-YIN algorithm has been found, it will be incorporated and merged into the main
-branch. To use the current implementation on the `f0M_spectrum` branch, one
-must install the MATLAB Python engine and download the MATLAB YIN library (see
-section [Testing](#Testing)).
 
 ## Installation
 
@@ -93,7 +85,7 @@ python -m pyTMST.<submodule>.test_<submodule>
 ## Citation
 
 This repository may be cited as follows
-> A. Zickler, M. Ernst, L. Varnet, A. Tavano (2023). Temporal Modulation
-> Spectrum Toolbox for Python (pyTMST): A Python toolbox for the computation of
-> amplitude- and f0- modulation spectra and spectrograms.
+> A. Zickler, A. Tavano, L. Varnet (2023). Temporal Modulation Spectrum Toolbox
+> for Python (pyTMST): A Python toolbox for the computation of amplitude- and
+> f0- modulation spectra and spectrograms.
 
