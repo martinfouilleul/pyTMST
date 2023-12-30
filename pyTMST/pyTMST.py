@@ -53,55 +53,6 @@ def AMa_spectrum(sig, fs, mfmin=0.5, mfmax=200, modbank_Nmod=200, fmin=70, fmax=
     return AMspec, fc, f_spectra, step
 
 
-def AMa_scalogram(sig, fs, window_NT, mfmin=0.5, mfmax=200, modbank_Nmod=200, fmin=70, fmax=6700):
-    if not isinstance(sig, np.ndarray) or not isinstance(fs, (int, float)):
-        raise ValueError("Invalid input types.")
-    if fs <= 0:
-        raise ValueError("fs must be a positive scalar.")
-
-    t = np.arange(1,len(sig)+1) / fs
-    gamma_responses, fc = auditory_filterbank(sig, fs, fmin, fmax)
-    E = np.abs(hilbert(gamma_responses, axis=1))
-    
-    f_spectra, f_spectra_intervals = define_modulation_axis(mfmin, mfmax, modbank_Nmod)
-    Nchan = fc.shape[0]
-
-    # determine first dimension of scalogram (TODO: optimise in future release)
-    dims = []
-    for ichan in range(Nchan):
-        for ifreq in range(modbank_Nmod):
-            window_length = window_NT * (1/f_spectra[ifreq])
-            shift = 0.1
-            windows = segment_into_windows(E[ichan, :], fs, window_length, shift, True)
-            n_windows = windows.shape[0]
-            for iwin in range(n_windows):
-                dims.append(iwin + round(window_length / 2 / shift) + 1)
-    dim = max(dims)
-
-    AMsgram = np.zeros((dim, modbank_Nmod))
-    for ichan in range(Nchan):
-        AMspec = np.zeros((dim, modbank_Nmod))
-        for ifreq in range(modbank_Nmod):
-            window_length = window_NT * (1 / f_spectra[ifreq])
-            shift = 0.1
-            windows = segment_into_windows(E[ichan, :], fs, window_length, shift, True)
-            n_windows = windows.shape[0]
-
-            for iwin in range(n_windows):
-                temp = windows[iwin]
-                Efft = periodogram(temp, fs, [0.01, f_spectra[ifreq]])
-                Efft = 2 * Efft[1]
-                index = iwin + round(window_length / 2 / shift) 
-                AMspec[index, ifreq] = Efft
-
-        AMsgram += AMspec
-        AMsgram[AMsgram == 0] = np.nan
-
-    t = np.arange(1, n_windows + 1) * shift
-    step = AMa_scalogram_params(t, aud_filt_bw(fc), gamma_responses, E, f_spectra, fc)
-    return AMsgram, fc, f_spectra, step
-
-
 def AMi_spectrum(sig, fs, mfmin=0.5, mfmax=200., modbank_Nmod=200, modbank_Qfactor=1, fmin=70, fmax=6700):
     if not isinstance(sig, np.ndarray) or not isinstance(fs, (int, float)):
         raise ValueError("Invalid input types.")
@@ -145,51 +96,4 @@ def f0M_spectrum(sig, fs, mfmin=.5, mfmax=200., modbank_Nmod=200, undersample=20
     step = f0M_spec_params(t_f0, f0, f_spectra, f_spectra_intervals)
 
     return f0M_spectrum, f_spectra, step
-
-
-def f0M_scalogram(sig, fs, window_NT, mfmin=.5, mfmax=200., modbank_Nmod=200, undersample=20, fmin=60, fmax=550, yin_thresh=.2, ap0_thresh=.8, max_jump=10, min_duration=.08):
-    w_len = -(fs // -fmin) # ceiling division
-    f0, ap0 = librosa_yin(sig, fs, fmin, fmax, yin_thresh, undersample)
-
-    f0[ap0 > ap0_thresh] = np.nan
-    f0 = remove_artifacts(f0, fs/undersample, max_jump, min_duration, (fmin, fmax), (.4, 2.5), 1500)
-
-    f_spectra, f_spectra_intervals = define_modulation_axis(mfmin, mfmax, modbank_Nmod)
-
-    fs_yin = fs / undersample
-    t_yin = np.arange(1, len(f0) + 1) / fs_yin
-
-    # determine first dimension of scalogram (TODO: optimise in future release)
-    dims = []
-    for ifreq in range(modbank_Nmod):
-        window_length = window_NT * (1 / f_spectra[ifreq])
-        shift = 0.1
-        windows = segment_into_windows(f0, fs_yin, window_length, shift, False)
-        n_windows = windows.shape[0]
-        for iwin in range(n_windows):
-            index = iwin + round(window_length / 2 / shift) + 1
-            dims.append(index)
-    dim = np.max(dims)
-
-    f0Msgram = np.zeros((dim, modbank_Nmod))
-    for ifreq in range(modbank_Nmod):
-        window_length = window_NT * (1 / f_spectra[ifreq])
-        shift = 0.1
-        windows = segment_into_windows(f0, fs_yin, window_length, shift, False)
-        t_windows = segment_into_windows(t_yin, fs_yin, window_length, shift, False)
-        n_windows = windows.shape[0]
-
-        for iwin in range(n_windows):
-            f0_temp = windows[iwin]
-            t_temp = t_windows[iwin]
-
-            _, f0Mfft = lombscargle(t_temp, f0_temp, np.array([0.01, f_spectra[ifreq]]))
-            f0Mfft = 2 * f0Mfft[1]
-
-            index = iwin + round(window_length / 2 / shift)
-            f0Msgram[index, ifreq] = f0Mfft
-
-    f0Msgram[f0Msgram == 0] = np.nan
-
-    return f0Msgram, f_spectra
 

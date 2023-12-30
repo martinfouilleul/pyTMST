@@ -72,32 +72,6 @@ class TestPyTMST(unittest.TestCase):
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 
 
-    def test_AMa_scalogram(self):
-        audio_path = './LaVoixHumaine_6s.wav'
-        window_NT = 3
-        mfmin, mfmax = 0.5, 200.
-        modbank_Nmod = 200
-        fmin, fmax = 70., 6700.
-
-        sig, fs = sf.read(audio_path)
-        sig = sig[:,0]
-        py_AMa_scalo, py_fc, py_scale, py_step = pyTMST.AMa_scalogram(sig, fs, window_NT, mfmin, mfmax, modbank_Nmod, fmin, fmax)
-
-        self.eng.eval(f"[sig, fs] = audioread('{audio_path}');", nargout=0)
-        self.eng.eval(f"[AMscalo, fc, scale, step] = AMscalogram(sig(:,1), fs, {window_NT});", nargout=0)
-        mat_AMa_scalo = np.squeeze(self.eng.workspace['AMscalo'])
-        mat_fc = np.squeeze(self.eng.workspace['fc'])
-        mat_scale = np.squeeze(self.eng.workspace['scale'])
-        mat_step = pyTMST.AMa_scalogram_params(**self.eng.workspace['step'])
-
-        np.testing.assert_allclose(mat_fc, py_fc,
-                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
-        np.testing.assert_allclose(mat_scale, py_scale,
-                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
-        np.testing.assert_allclose(mat_AMa_scalo, py_AMa_scalo,
-                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
-
-
     def test_AMi_spectrum(self):
         audio_path = './LaVoixHumaine_6s.wav'
         mfmin, mfmax = 0.5, 200.
@@ -153,32 +127,6 @@ class TestPyTMST(unittest.TestCase):
         np.testing.assert_allclose(mat_mf, py_mf,
                                    rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 
-
-    def test_f0M_scalogram(self):
-        audio_path = './LaVoixHumaine_6s.wav'
-        window_NT = 1024
-        mfmin, mfmax = .5, 200.
-        modbank_Nmod = 200
-        undersample = 20
-        fmin, fmax = 60, 550
-        yin_thresh = .2
-        ap0_thresh = .8
-        max_jump = 10
-        min_duration = .08
-
-        sig, fs = sf.read(audio_path)
-        sig = sig[:,0]
-        py_f0M_scalo, py_scale = pyTMST.f0M_scalogram(sig, fs, window_NT, mfmin, mfmax, modbank_Nmod, undersample, fmin, fmax, yin_thresh, ap0_thresh, max_jump, min_duration)
-
-        self.eng.eval(f"[sig, fs] = audioread('{audio_path}');", nargout=0)
-        self.eng.eval(f"[f0Mscalo, scale, step] = f0Mscalogram(sig(:,1), fs, {window_NT});", nargout=0)
-        mat_f0M_scalo = np.squeeze(self.eng.workspace['f0Mscalo'])
-        mat_scale = np.squeeze(self.eng.workspace['scale'])
-
-        np.testing.assert_allclose(mat_f0M_scalo, py_f0M_scalo,
-                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
-        np.testing.assert_allclose(mat_scale, py_scale,
-                                   rtol=self.float_rel_tolerance, atol=self.float_abs_tolerance)
 
 
 
