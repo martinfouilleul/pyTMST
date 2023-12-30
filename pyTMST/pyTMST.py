@@ -23,7 +23,7 @@ from scipy.signal import hilbert
 from .utils import define_modulation_axis, segment_into_windows, periodogram, lombscargle, remove_artifacts, interpmean
 from .pyLTFAT import aud_filt_bw
 from .pyAMT import auditory_filterbank, king2019_modfilterbank_updated
-from .pyYIN import mock_yin
+from .yin import librosa_yin
 
 
 AMa_spec_params = namedtuple('AMa_spec_params', ['t', 'f_bw', 'gamma_responses', 'E', 'mf', 'mfb'])
@@ -124,10 +124,8 @@ def AMi_spectrum(sig, fs, mfmin=0.5, mfmax=200., modbank_Nmod=200, modbank_Qfact
 
 
 def f0M_spectrum(sig, fs, mfmin=.5, mfmax=200., modbank_Nmod=200, undersample=20, fmin=60, fmax=550, yin_thresh=.2, ap0_thresh=.8, max_jump=10, min_duration=.08):
-    w_len = -(fs // -fmin) # ceiling division
-    f0, ap0 = mock_yin(sig, fs, fmin, fmax, yin_thresh, undersample)
+    f0, ap0 = librosa_yin(sig, fs, fmin, fmax, yin_thresh, undersample)
 
-    f0 = 440 * np.power(2, f0)
     f0[ap0 > ap0_thresh] = np.nan
     f0 = remove_artifacts(f0, fs/undersample, max_jump, min_duration, (fmin, fmax), (.4, 2.5), 1500)
     f0_wo_nan = f0[~np.isnan(f0)]
@@ -151,9 +149,8 @@ def f0M_spectrum(sig, fs, mfmin=.5, mfmax=200., modbank_Nmod=200, undersample=20
 
 def f0M_scalogram(sig, fs, window_NT, mfmin=.5, mfmax=200., modbank_Nmod=200, undersample=20, fmin=60, fmax=550, yin_thresh=.2, ap0_thresh=.8, max_jump=10, min_duration=.08):
     w_len = -(fs // -fmin) # ceiling division
-    f0, ap0 = mock_yin(sig, fs, fmin, fmax, yin_thresh, undersample)
+    f0, ap0 = librosa_yin(sig, fs, fmin, fmax, yin_thresh, undersample)
 
-    f0 = 440 * np.power(2, f0)
     f0[ap0 > ap0_thresh] = np.nan
     f0 = remove_artifacts(f0, fs/undersample, max_jump, min_duration, (fmin, fmax), (.4, 2.5), 1500)
 

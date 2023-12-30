@@ -1,5 +1,6 @@
-import matlab.engine
 import numpy as np
+import matlab.engine
+from .librosa_yin_ap import yin_ap
 
 
 def mock_yin(sig, fs, f0_min, f0_max, thresh, hop):
@@ -9,7 +10,17 @@ def mock_yin(sig, fs, f0_min, f0_max, thresh, hop):
     eng.workspace['sig'] = matlab.double(sig.reshape(-1,1).tolist())
     eng.workspace['fs'] = matlab.double(fs)
     eng.eval(f"r = yin(sig, P);", nargout=0)
-    f0 = np.squeeze(eng.workspace['r']['f0'])
+    f0 = 440. * 2 ** np.squeeze(eng.workspace['r']['f0'])
     ap0 = np.squeeze(eng.workspace['r']['ap0'])
     return f0, ap0
-    
+
+
+def librosa_yin(sig, fs, f0_min, f0_max, thresh, hop):
+    f0, ap0 = yin_ap(sig, sr=fs,
+                     fmin=f0_min, fmax=f0_max,
+                     trough_threshold=thresh,
+                     hop_length=hop,
+                     win_length=-(fs // -f0_min), # ceiling division
+                     frame_length=10000
+                     )
+    return f0, ap0
