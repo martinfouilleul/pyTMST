@@ -1,3 +1,6 @@
+[![DOI](https://zenodo.org/badge/698224655.svg)](https://zenodo.org/doi/10.5281/zenodo.10444467)
+
+
 # pyTMST
 
 Python port of the [Temporal Modulation Spectrum Toolbox
