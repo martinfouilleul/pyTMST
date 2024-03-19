@@ -1,9 +1,9 @@
 import numpy as np
-import matlab.engine
 from .librosa_yin_ap import yin_ap
 
 
 def mock_yin(sig, fs, f0_min, f0_max, thresh, hop):
+    import matlab.engine
     eng = matlab.engine.start_matlab()
     eng.eval(f"addpath(genpath('./matlab_toolboxes/yin'))", nargout=0)
     eng.eval(f"P = struct('sr', {fs}, 'minf0', {f0_min}, 'maxf0', {f0_max}, 'thresh', {thresh}, 'hop', {hop});", nargout=0)
