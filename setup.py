@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='pyTMST',
-    version='1.0.0',
+    version='1.0.1',
     packages=['pyTMST', 'pyTMST.pyAMT', 'pyTMST.pyLTFAT', 'pyTMST.utils', 'pyTMST.yin'],
     description='Python port of the MATLAB TMST toolbox',
     install_requires=[
@@ -20,4 +20,3 @@ setup(
         'pyTMST': ['LICENSES/*'],
         },
 )
-

@@ -40,6 +40,7 @@ def AMa_spectrum(sig, fs, mfmin=0.5, mfmax=200, modbank_Nmod=200, fmin=70, fmax=
     t = np.arange(1,len(sig)+1) / fs
     gamma_responses, fc = auditory_filterbank(sig, fs, fmin, fmax)
     E = np.abs(hilbert(gamma_responses, axis=1))
+    E -= np.mean(E, 1, keepdims=True)
 
     f_spectra, f_spectra_intervals = define_modulation_axis(mfmin, mfmax, modbank_Nmod)
     Nchan = fc.shape[0]
