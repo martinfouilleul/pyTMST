@@ -31,7 +31,7 @@ AMi_spec_params = namedtuple('AMi_spec_params', ['t', 'f_bw', 'gamma_responses',
 f0M_spec_params = namedtuple('f0M_spec_params', ['t', 'f0', 'mf', 'mfb'])
 
 
-def AMa_spectrum(sig, fs, mfmin=0.5, mfmax=200, modbank_Nmod=200, fmin=70, fmax=6700):
+def AMa_spectrum(sig, fs, mfmin=0.5, mfmax=200, modbank_Nmod=200, fmin=70, fmax=6700, window=None):
     if not isinstance(sig, np.ndarray) or not isinstance(fs, (int, float)):
         raise ValueError("Invalid input types.")
     if fs <= 0:
@@ -41,6 +41,9 @@ def AMa_spectrum(sig, fs, mfmin=0.5, mfmax=200, modbank_Nmod=200, fmin=70, fmax=
     gamma_responses, fc = auditory_filterbank(sig, fs, fmin, fmax)
     E = np.abs(hilbert(gamma_responses, axis=1))
     E -= np.mean(E, 1, keepdims=True)
+
+    if window is not None:
+        E *= window
 
     f_spectra, f_spectra_intervals = define_modulation_axis(mfmin, mfmax, modbank_Nmod)
     Nchan = fc.shape[0]
